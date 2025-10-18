@@ -1,0 +1,17 @@
+services:
+  speech-admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: speech-admin
+    ports:
+      - '127.0.0.1:3000:3000'
+    env_file:
+      - .env.production
+    networks:
+      - speech-network
+    restart: unless-stopped
+
+networks:
+    speech-network:
+      external: true
