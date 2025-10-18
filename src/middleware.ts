@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-
 const AUTH_COOKIE_NAME = process.env.AUTH_COOKIE_NAME!;
 
 export function middleware(req: NextRequest) {

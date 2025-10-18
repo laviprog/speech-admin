@@ -20,7 +20,7 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
   const token = jwt.sign(payload, JWT_SECRET, {
     expiresIn: '7d',
   });
-  console.log(token)
+  console.log(token);
   return { access_token: token, token_type: 'Bearer' };
 }
 
