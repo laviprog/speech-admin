@@ -1,6 +1,8 @@
 # Speech API Admin
 
-**Speech API Admin** is a web application that allows admins to manage and monitor speech API usage. It provides a user-friendly interface for viewing statistics, managing users, and configuring settings.
+**Speech API Admin** is a web application that allows admins to manage and monitor speech API usage. It provides a user-friendly interface for viewing statistics, managing users, and configuring settings. Related project: [Speech API](https://github.com/laviprog/speech-api)
+
+![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
 
 ## Features
 - 📊 **Usage Statistics** — View detailed statistics on API usage.
