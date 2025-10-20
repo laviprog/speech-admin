@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import argon2 from 'argon2';
-import { LoginCredentials, User, AuthResponse, TokenPayload } from '@/types/auth';
+import { AuthResponse, LoginCredentials, TokenPayload, User } from '@/types/auth';
 import { get_admin } from '@/lib/db/queries';
 
 type IssuePayload = Omit<TokenPayload, 'exp'>;
@@ -20,7 +20,6 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
   const token = jwt.sign(payload, JWT_SECRET, {
     expiresIn: '7d',
   });
-  console.log(token);
   return { access_token: token, token_type: 'Bearer' };
 }
 
