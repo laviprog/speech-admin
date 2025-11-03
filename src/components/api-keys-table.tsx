@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreVertical } from 'lucide-react';
+import { Ban, CheckCircle, MoreVertical, Trash2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ApiKeyWithStats } from '@/types/api-key';
-import { toggleApiKeyStatusAction } from '@/app/actions/api-keys';
+import { deleteApiKeyAction, toggleApiKeyStatusAction } from '@/app/actions/api-keys';
 import { toast } from 'react-toastify';
 import { Card } from '@/components/ui/card';
 import { formatDate } from '@/lib/utils';
@@ -41,6 +41,17 @@ export function ApiKeysTable({ apiKeys }: ApiKeysTableProps) {
         localApiKeys.map((k) => (k.id === apiKeyId ? { ...k, isActive: !currentStatus } : k))
       );
       toast.success(`API key ${!currentStatus ? 'activated' : 'deactivated'}`);
+    }
+  };
+
+  const handleDeleteApiKey = async (apiKeyId: string) => {
+    const result = await deleteApiKeyAction(apiKeyId);
+
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      setLocalApiKeys(localApiKeys.filter((k) => k.id !== apiKeyId));
+      toast.success('API key deleted');
     }
   };
 
@@ -95,7 +106,21 @@ export function ApiKeysTable({ apiKeys }: ApiKeysTableProps) {
                       <DropdownMenuItem
                         onClick={() => handleToggleStatus(apiKey.id, apiKey.isActive)}
                       >
-                        {apiKey.isActive ? 'Deactivate' : 'Activate'}
+                        {apiKey.isActive ? (
+                          <>
+                            <Ban className="h-4 w-4" />
+                            Deactivate
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="h-4 w-4" />
+                            Activate
+                          </>
+                        )}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleDeleteApiKey(apiKey.id)}>
+                        <Trash2 className="h-4 w-4" />
+                        Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

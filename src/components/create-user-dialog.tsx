@@ -14,21 +14,19 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus } from 'lucide-react';
-import { createUser } from '@/app/actions/users';
+import { createUserAction } from '@/app/actions/users';
 import { toast } from 'react-toastify';
-import { useRouter } from 'next/navigation';
 
 export function CreateUserDialog() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [companyName, setCompanyName] = useState('');
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const result = await createUser(companyName);
+    const result = await createUserAction(companyName);
 
     if (result.error) {
       toast.error(result.error);
@@ -38,7 +36,7 @@ export function CreateUserDialog() {
       setOpen(false);
       setCompanyName('');
       setLoading(false);
-      router.refresh();
+      window.location.reload();
     }
   };
 

@@ -16,7 +16,6 @@ import { Label } from '@/components/ui/label';
 import { Check, Copy, Plus } from 'lucide-react';
 import { createApiKeyAction } from '@/app/actions/api-keys';
 import { toast } from 'react-toastify';
-import { useRouter } from 'next/navigation';
 
 interface CreateApiKeyDialogProps {
   userId: string;
@@ -28,7 +27,6 @@ export function CreateApiKeyDialog({ userId }: CreateApiKeyDialogProps) {
   const [name, setName] = useState('');
   const [generatedKey, setGeneratedKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +57,7 @@ export function CreateApiKeyDialog({ userId }: CreateApiKeyDialogProps) {
     setName('');
     setGeneratedKey(null);
     setCopied(false);
-    router.refresh();
+    window.location.reload();
   };
 
   return (

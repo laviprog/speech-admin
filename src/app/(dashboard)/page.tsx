@@ -71,7 +71,7 @@ export default async function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {recentUsers.slice(0, 5).map((user) => (
+            {recentUsers.slice(0, 3).map((user) => (
               <Link
                 key={user.id}
                 href={`/users/${user.id}`}
@@ -106,7 +106,7 @@ export default async function DashboardPage() {
       </Card>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>

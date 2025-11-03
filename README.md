@@ -5,6 +5,7 @@
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
 
 ## Features
+
 - 📊 **Usage Statistics** — View detailed statistics on API usage.
 - 👥 **User Management** — Add, remove, and manage users.
 - ⚙️ **Configuration Settings** — Adjust settings for the speech API.
@@ -30,6 +31,7 @@
    ```bash
    cp .env.example .env.production
    ```
+
    Then fill all in the required variables.
 
 3. **Install dependencies**:
@@ -44,18 +46,21 @@
 
 4. **Run the app locally**:
 
-    Build the application:
+   Build the application:
+
    ```bash
    npm run build
    # or
    pnpm build
    ```
+
    Run the built application:
-    ```bash
-    npm start
-    # or
-    pnpm start
-    ```
+
+   ```bash
+   npm start
+   # or
+   pnpm start
+   ```
 
 Open http://localhost:3000 to view it in the browser.
 

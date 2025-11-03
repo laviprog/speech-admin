@@ -1,5 +1,5 @@
 import { admins, apiKeys, transcriptionTasks, users } from '@/lib/db/schema';
-import { and, desc, eq, isNull, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, isNull, lte, SQL, sql } from 'drizzle-orm';
 import { database } from '.';
 import { randomUUID } from 'crypto';
 import argon2 from 'argon2';
@@ -24,7 +24,7 @@ export async function create_admin(email: string, password: string) {
 }
 
 export async function getUsersWithStats() {
-  const result = await database
+  return database
     .select({
       id: users.id,
       companyName: users.companyName,
@@ -41,8 +41,6 @@ export async function getUsersWithStats() {
     .where(isNull(users.deletedAt))
     .groupBy(users.id)
     .orderBy(desc(users.createdAt));
-
-  return result;
 }
 
 export async function createUser(companyName: string) {
@@ -62,6 +60,11 @@ export async function updateUserStatus(userId: string, isActive: boolean) {
   await database.update(users).set({ isActive, updatedAt: new Date() }).where(eq(users.id, userId));
 }
 
+export interface DateRangeFilter {
+  from: Date;
+  to: Date;
+}
+
 export async function getUserById(userId: string) {
   const [user] = await database
     .select()
@@ -70,8 +73,20 @@ export async function getUserById(userId: string) {
   return user;
 }
 
-export async function getApiKeysByUserId(userId: string) {
-  const result = await database
+export async function getApiKeysByUserId(userId: string, dateRange?: DateRangeFilter) {
+  const conditions = [eq(apiKeys.userId, userId), isNull(apiKeys.deletedAt)];
+
+  let taskConditions: SQL | undefined = eq(apiKeys.id, transcriptionTasks.apiKeyId);
+
+  if (dateRange) {
+    taskConditions = and(
+      taskConditions,
+      gte(transcriptionTasks.createdAt, dateRange.from),
+      lte(transcriptionTasks.createdAt, dateRange.to)
+    );
+  }
+
+  return database
     .select({
       id: apiKeys.id,
       userId: apiKeys.userId,
@@ -81,15 +96,13 @@ export async function getApiKeysByUserId(userId: string) {
       lastUsedAt: apiKeys.lastUsedAt,
       createdAt: apiKeys.createdAt,
       requestCount: sql<number>`count(${transcriptionTasks.id})`,
-      totalDuration: sql<number>`sum(${transcriptionTasks.durationSeconds})`,
+      totalDuration: sql<number>`coalesce(sum(${transcriptionTasks.durationSeconds}), 0)`,
     })
     .from(apiKeys)
-    .leftJoin(transcriptionTasks, eq(apiKeys.id, transcriptionTasks.apiKeyId))
-    .where(and(eq(apiKeys.userId, userId), isNull(apiKeys.deletedAt)))
+    .leftJoin(transcriptionTasks, taskConditions)
+    .where(and(...conditions))
     .groupBy(apiKeys.id)
     .orderBy(desc(apiKeys.createdAt));
-
-  return result;
 }
 
 export async function createApiKey(
@@ -125,11 +138,25 @@ export async function toggleApiKeyStatus(apiKeyId: string, isActive: boolean) {
     .where(eq(apiKeys.id, apiKeyId));
 }
 
-export async function getAnalytics() {
+export async function getAnalytics(dateFrom?: Date, dateTo?: Date) {
+  const dateConditions = [];
+
+  if (dateFrom) {
+    dateConditions.push(gte(transcriptionTasks.createdAt, dateFrom));
+  }
+
+  if (dateTo) {
+    const dateToEnd = new Date(dateTo);
+    dateToEnd.setHours(23, 59, 59, 999);
+    dateConditions.push(lte(transcriptionTasks.createdAt, dateToEnd));
+  }
+
+  const taskWhere = dateConditions.length > 0 ? and(...dateConditions) : undefined;
+
   const [stats] = await database
     .select({
-      totalRequests: sql<number>`count(${transcriptionTasks.id})`,
-      totalDurationSeconds: sql<number>`sum(${transcriptionTasks.durationSeconds})`,
+      totalRequests: sql<number>`count(${transcriptionTasks.id}) filter (where ${transcriptionTasks.id} is not null ${taskWhere ? sql`and ${taskWhere}` : sql``})`,
+      totalDurationSeconds: sql<number>`sum(${transcriptionTasks.durationSeconds}) filter (where ${transcriptionTasks.id} is not null ${taskWhere ? sql`and ${taskWhere}` : sql``})`,
       activeUsers: sql<number>`count(distinct case when ${users.isActive} = true then ${users.id} end)`,
       totalApiKeys: sql<number>`count(distinct ${apiKeys.id})`,
     })
@@ -144,6 +171,7 @@ export async function getAnalytics() {
       count: sql<number>`count(*)`,
     })
     .from(transcriptionTasks)
+    .where(taskWhere)
     .groupBy(transcriptionTasks.status);
 
   const statusMap = tasksByStatus.reduce(
@@ -163,7 +191,12 @@ export async function getAnalytics() {
     })
     .from(users)
     .leftJoin(apiKeys, eq(users.id, apiKeys.userId))
-    .leftJoin(transcriptionTasks, eq(apiKeys.id, transcriptionTasks.apiKeyId))
+    .leftJoin(
+      transcriptionTasks,
+      taskWhere
+        ? and(eq(apiKeys.id, transcriptionTasks.apiKeyId), taskWhere)
+        : eq(apiKeys.id, transcriptionTasks.apiKeyId)
+    )
     .where(isNull(users.deletedAt))
     .groupBy(users.id)
     .orderBy(desc(sql`count(${transcriptionTasks.id})`))
@@ -174,4 +207,18 @@ export async function getAnalytics() {
     tasksByStatus: statusMap,
     topUsers: topUsers.filter((u) => u.requestCount > 0),
   };
+}
+
+export async function deleteApiKey(apiKeyId: string) {
+  await database
+    .update(apiKeys)
+    .set({ deletedAt: new Date(), updatedAt: new Date() })
+    .where(eq(apiKeys.id, apiKeyId));
+}
+
+export async function deleteUser(userId: string) {
+  await database
+    .update(users)
+    .set({ deletedAt: new Date(), updatedAt: new Date() })
+    .where(eq(users.id, userId));
 }

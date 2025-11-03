@@ -1,14 +1,6 @@
 'use client';
 
-import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Analytics } from '@/types/analytics';
 
 interface AnalyticsDashboardProps {
@@ -16,8 +8,6 @@ interface AnalyticsDashboardProps {
 }
 
 export function AnalyticsDashboard({ analytics }: AnalyticsDashboardProps) {
-  const [period, setPeriod] = useState('7d');
-
   const stats = [
     {
       title: 'Total Requests',
@@ -73,22 +63,6 @@ export function AnalyticsDashboard({ analytics }: AnalyticsDashboardProps) {
 
   return (
     <div className="space-y-4">
-      {/* Period selector */}
-      <div className="flex justify-end items-center">
-        <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="24h">Last 24 hours</SelectItem>
-            <SelectItem value="7d">Last 7 days</SelectItem>
-            <SelectItem value="30d">Last 30 days</SelectItem>
-            <SelectItem value="90d">Last 90 days</SelectItem>
-            <SelectItem value="all">All time</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
       {/* Stats grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {stats.map((stat) => (
@@ -139,7 +113,9 @@ export function AnalyticsDashboard({ analytics }: AnalyticsDashboardProps) {
                     </div>
                     <div>
                       <div className="font-medium">{user.companyName || 'N/A'}</div>
-                      <div className="text-sm">{user.totalDuration} sec processing time</div>
+                      <div className="text-sm">
+                        {user.totalDuration.toFixed(2)} sec processing time
+                      </div>
                     </div>
                   </div>
                   <div className="text-right">

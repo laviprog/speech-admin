@@ -1,9 +1,9 @@
 'use server';
 
-import { createUser as dbCreateUser, updateUserStatus } from '@/lib/db/queries';
+import { createUser as dbCreateUser, deleteUser, updateUserStatus } from '@/lib/db/queries';
 import { revalidatePath } from 'next/cache';
 
-export async function createUser(companyName: string) {
+export async function createUserAction(companyName: string) {
   try {
     await dbCreateUser(companyName);
     revalidatePath('/users');
@@ -15,7 +15,7 @@ export async function createUser(companyName: string) {
   }
 }
 
-export async function toggleUserStatus(userId: string, isActive: boolean) {
+export async function toggleUserStatusAction(userId: string, isActive: boolean) {
   try {
     await updateUserStatus(userId, isActive);
     revalidatePath('/users');
@@ -24,6 +24,18 @@ export async function toggleUserStatus(userId: string, isActive: boolean) {
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : 'Failed to update user status',
+    };
+  }
+}
+
+export async function deleteUserAction(userId: string) {
+  try {
+    await deleteUser(userId);
+    revalidatePath('/users');
+    return { success: true };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : 'Failed to delete user',
     };
   }
 }

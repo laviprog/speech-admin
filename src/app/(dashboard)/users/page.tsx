@@ -1,6 +1,6 @@
 import { getUsersWithStats } from '@/lib/db/queries';
-import { UsersTable } from '@/components/users-table';
 import { CreateUserDialog } from '@/components/create-user-dialog';
+import { UsersTable } from '@/components/users-table';
 
 export default async function UsersPage() {
   const users = await getUsersWithStats();

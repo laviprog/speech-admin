@@ -9,8 +9,9 @@ export async function loginAction(credentials: LoginCredentials) {
     const response = await authLogin(credentials);
     await setAuthCookie(response.access_token);
   } catch (error) {
+    console.error(error);
     return {
-      error: error instanceof Error ? error.message : 'Login failed',
+      error: 'Login failed',
     };
   }
 

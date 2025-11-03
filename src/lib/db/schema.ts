@@ -1,13 +1,12 @@
 import {
+  boolean,
+  doublePrecision,
+  integer,
   pgEnum,
   pgTable,
+  timestamp,
   uuid,
   varchar,
-  boolean,
-  timestamp,
-  integer,
-  jsonb,
-  doublePrecision,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -70,7 +69,6 @@ export const transcriptionTasks = pgTable('transcription_tasks', {
   numSpeakers: integer('num_speakers'),
   startedAt: timestamp('started_at', { withTimezone: true }),
   completedAt: timestamp('completed_at', { withTimezone: true }),
-  transcriptionResult: jsonb('transcription_result'),
   durationSeconds: doublePrecision('duration_seconds'),
   fileSizeBytes: integer('file_size_bytes'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull(),

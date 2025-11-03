@@ -1,6 +1,6 @@
 'use server';
 
-import { createApiKey, toggleApiKeyStatus } from '@/lib/db/queries';
+import { createApiKey, deleteApiKey, toggleApiKeyStatus } from '@/lib/db/queries';
 import { revalidatePath } from 'next/cache';
 import { createHash, randomBytes } from 'crypto';
 
@@ -13,9 +13,6 @@ export async function createApiKeyAction(userId: string, name?: string) {
     const keyHash = createHash('sha256').update(apiKey).digest('hex');
 
     await createApiKey(userId, keyPrefix, keyHash, name);
-
-    revalidatePath(`/users/${userId}`);
-    revalidatePath('/api-keys');
 
     return { apiKey };
   } catch (error) {
@@ -34,6 +31,17 @@ export async function toggleApiKeyStatusAction(apiKeyId: string, isActive: boole
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : 'Failed to update API key status',
+    };
+  }
+}
+
+export async function deleteApiKeyAction(apiKeyId: string) {
+  try {
+    await deleteApiKey(apiKeyId);
+    return { success: true };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : 'Failed to delete API key',
     };
   }
 }
