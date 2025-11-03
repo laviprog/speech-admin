@@ -6,7 +6,7 @@ services:
     container_name: speech-admin
     image: speech-admin
     ports:
-      - '127.0.0.1:3000:3000'
+      - '127.0.0.1:3033:3000'
     env_file:
       - .env.production
     networks:
